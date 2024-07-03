@@ -70,7 +70,7 @@ const routes: Routes = [
     children: [
       {
         path: 'create',
-        data: { title: 'Create Loans Account', breadcrumb: 'Create Loans Account' },
+        data: { title: 'Create Loans Account', breadcrumb: 'Create Loans Account1' },
         component: CreateLoansAccountComponent,
         resolve: {
           loansAccountTemplate: LoansAccountTemplateResolver

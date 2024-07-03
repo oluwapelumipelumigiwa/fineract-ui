@@ -35,7 +35,10 @@ export class BulkAccountComponent implements OnInit, AfterViewInit {
   loansAccountDetailsForm: UntypedFormGroup;
   /** Loan Purpose Options */
   loanPurposeOptions: any;
-  
+  loanPurposeData: any;
+  loansAccountTemplateData: any;
+  loanProductSelected = false;
+
   /**
    * Sets loans account details form.
    * @param {FormBuilder} formBuilder Form Builder.
@@ -54,10 +57,9 @@ export class BulkAccountComponent implements OnInit, AfterViewInit {
   ) {
     this.route.data.subscribe((data: {loansAccountTemplate:any,groupClientMembers: any }) => {
       console.log(data);
-      const loansAccountTemplate = data.loansAccountTemplate;
-      this.productData = loansAccountTemplate.productOptions
-      this.loanOfficerData = loansAccountTemplate.loanOfficerOptions 
-      this.fundData = []
+      this.loansAccountTemplateData = data.loansAccountTemplate;
+      this.productData = this.loansAccountTemplateData.productOptions
+      this.loanOfficerData = this.loansAccountTemplateData.loanOfficerOptions 
     });
     this.route.parent.data.subscribe((data: { groupViewData: any }) => {
       this.groupClientMembers = data.groupViewData.clientMembers;
@@ -74,6 +76,22 @@ export class BulkAccountComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {    
     console.log("this is bulk loan accounts");
     console.log(this.loansAccountTemplate);
+  }
+
+  onSelectProduct(productObj: any){
+    this.setTemplate(productObj)
+  }
+
+  setTemplate(productObj: any) {
+    const entityId =(this.loansAccountTemplateData.clientId) ? this.loansAccountTemplateData.clientId : this.loansAccountTemplateData.group.id;
+    const isGroup =(this.loansAccountTemplateData.clientId) ? false : true;
+    const productId = productObj.id;
+    this.loansService.getLoansAccountTemplateResource(entityId, isGroup, productId).subscribe((response: any) => {
+        // console.log(response);
+      this.fundData = response.fundOptions
+      this.loanPurposeData = response.loanPurposeOptions
+      this.loanProductSelected = true;
+    });
   }
 
   /**
@@ -163,6 +181,8 @@ export class BulkAccountComponent implements OnInit, AfterViewInit {
   }
 
   submit() {
+    console.log(this.clientMembers);return
+    
     const bulkLoanFormData = this.bulkLoanForm.value;
     const locale = this.settingsService.language.code;
     const dateFormat = this.settingsService.dateFormat;
@@ -182,7 +202,9 @@ export class BulkAccountComponent implements OnInit, AfterViewInit {
 
     data.clientMembers = [];
     this.clientMembers.forEach((client: any) => data.clientMembers.push(client.id));
+
     console.log(data);
+    
     
     // data.clientMembers = [];
     // this.clientMembers.forEach((client: any) => data.clientMembers.push(client.id));
